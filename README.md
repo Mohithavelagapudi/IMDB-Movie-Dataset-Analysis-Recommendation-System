@@ -1,35 +1,16 @@
-# IMDB Movie Dataset Analysis & Recommendation System
+# 🎬 Movie Dataset Analysis & Recommendation System with Apache Spark
 
 **A Spark-based analytical pipeline and interactive recommendation app leveraging a 4K-movie IMDB-derived dataset (1980–2000) for exploratory insights and lightweight content-based recommendations.**
 
 ---
-## 🧠 Abstract
-This project conducts a comprehensive exploratory and analytical study of a curated IMDB movie dataset (≈4,000 films, 13 attributes) to derive production, talent, geographic, financial, and temporal insights while delivering a minimal viable recommendation engine. Using Apache Spark for distributed preprocessing and analytical aggregation, we engineer a cleansed, reliable dataset (handling nulls, duplicates, and zero-value artifacts) and compute multi-faceted KPIs: profitability, audience preference (IMDb score, votes), creative influence (director/star consistency), temporal evolution (runtime, score trends), and corporate performance (studio output & profit). A Streamlit + PySpark interface exposes genre-, star-, and production-house-based Top‑5 recommendations using a deterministic, content-aware filtering heuristic. The system serves as an extensible foundation for future collaborative filtering (ALS) or hybrid recommenders and illustrates end-to-end data engineering, analytical modeling, and user-facing delivery within a scalable architecture.
+## 🎯 Project Goals
+The primary objective is to build a live movie dashboard and recommendation system. This is broken down into the following key goals:
 
----
-## 📌 Table of Contents
-1. Introduction / Motivation  
-2. Dataset Description  
-3. Architecture & Pipeline  
-4. Data Preprocessing  
-5. Analytical Methodology  
-6. Recommendation Engine  
-7. Results & Key Findings  
-8. Challenges & Solutions  
-9. Key Insights  
-10. Future Enhancements  
-11. Tech Stack  
-12. Getting Started  
-13. Repository Structure  
-14. References
-
----
-## 1. Introduction / Motivation
-Content discovery remains a central problem in media platforms. While large-scale streaming services deploy complex hybrid recommenders, mid-scale analytical workflows still benefit from interpretable, data-driven foundations. This project targets:  
-- Curating a clean analytical layer from semi-structured movie metadata.  
-- Deriving executive-ready KPIs (creative success, financial leverage, geographic advantage).  
-- Demonstrating a transparent, content-based recommendation interface.  
-- Establishing a modular Spark workflow adaptable to advanced modeling (ALS, embeddings).
+- **Data Engineering**: Ingest, clean, and structure the raw Kaggle dataset into a robust MySQL database, making it persistent and queryable.
+- **Distributed Analysis**: Leverage Apache Spark and its DataFrame API to perform large-scale Exploratory Data Analysis (EDA) and complex aggregations that would be inefficient on a single machine.
+- **Insight Generation**: Answer specific business-driven questions, such as identifying top-performing directors, financially successful genres, and high-profit-margin production companies.
+- **System Development**: Build a functional, content-based recommendation engine that suggests movies to users based on their preferences.
+- **Visualization**: (Goal) Create a user-facing UI (dashboard) to present the analytical findings and host the recommendation system.
 
 ---
 ## 2. Dataset Description
@@ -53,21 +34,6 @@ Scope: Films released 1980–2000.
 | runtime | Duration (minutes) | Integer | 127 |
 
 Size: ~4,000 rows × 13 columns (post-cleaning slightly reduced).  
-Target Variables (implicit): Profit (gross − budget), score (quality proxy), votes (engagement proxy).  
-
----
-## 3. Architecture & Pipeline
-```mermaid
-graph TD;
-  A[Raw CSV] --> B[Spark Ingestion]
-  B --> C[Data Cleaning\n(null/duplicate/zero filtering)]
-  C --> D[Analytical Aggregations\n(KPIs, Top-N, Trends)]
-  C --> E[Feature Layer\n(genre, star, company, profit)]
-  E --> F[Content-Based Recommender]
-  D --> G[Visualization / Insights]
-  F --> H[Streamlit UI]
-```
-
 ---
 ## 4. Data Preprocessing
 Steps executed in Spark (spark_processing.sc):  
@@ -81,13 +47,17 @@ Steps executed in Spark (spark_processing.sc):
 ---
 ## 5. Analytical Methodology
 Spark SQL & DataFrame API operations: groupBy(), agg(), avg(), sum(), count(), orderBy(), limit(), window functions.  
-Key Analytical Segments:  
-- Top‑10 by IMDb score, director consistency, star performance.  
-- Company production volume vs average quality.  
-- Profit concentration by company & country.  
-- Temporal trends: quality vs year, runtime evolution, release seasonality.  
-- Collaboration profit networks (company–star, company–director pairs).  
-- Certification impact on score & volume.  
+Key Analytical Segments: 
+
+| 📈 Focus Area                 | 🔍 Insight Objective                                          |
+| ----------------------------- | ------------------------------------------------------------- |
+| 🎯 **Top-10 Rankings**        | IMDb score leaders, director consistency, star performance    |
+| 🏢 **Studio Analysis**        | Company production volume vs average quality                  |
+| 💵 **Profit Clusters**        | Concentration by company & country                            |
+| 📅 **Temporal Trends**        | Yearly quality shifts, runtime evolution, release seasonality |
+| 🤝 **Collaboration Networks** | Company–Star & Company–Director profit pairing                |
+| 🧾 **Certification Impact**   | How ratings affect score & volume                             |
+
 
 ---
 ## 6. Recommendation Engine
@@ -115,110 +85,63 @@ recs = (df.filter(col("genre") == genre)
 ## 7. Results & Key Findings
 (Representative illustrative summaries)
 
-### 7.1 Top Performance Samples
-| Category | Metric | Example Outcome |
-|----------|--------|-----------------|
-| Directors | Avg Score | High-score cluster among select auteurs |
-| Stars | Avg Score | Stable quality for recurring bankable leads |
-| Companies | Total Profit | Profit skew toward a few major studios |
-| Countries | Profit | Dominance of US; emerging secondary markets |
+### 7.1 🎬 Company-Based Analysis: Top Actor Collaborations by Profit
 
-### 7.2 Temporal Trends
-| Trend | Observation |
-|-------|------------|
-| Average Runtime | Moderate variance; clustering around commercial length |
-| Quality Over Years | Stability with mild upward drift in mid-1990s |
-| Release Month Distribution | Peaks in summer & holiday corridors |
+This analysis identifies the most profitable collaborations between production companies and their lead actors, based on total cumulative profit (Gross - Budget).
 
-### 7.3 Collaboration Profitability
-| Pair Type | Insight |
-|-----------|---------|
-| Company–Star | Certain actor partnerships yield multi-billion cumulative profit |
-| Company–Director | Director franchises correlate with sustained profitability |
+| Production Company | Star | Total Profit (USD) |
+| :--- | :--- | :--- |
+| Twentieth Century Fox | Leonardo DiCaprio | $2,001,647,264 |
+| Paramount Pictures | Tom Cruise | $1,276,761,018 |
+| Universal Pictures | Sam Neill | $1,246,709,112 |
+| Paramount Pictures | Harrison Ford | $1,177,913,541 |
+| Paramount Pictures | Eddie Murphy | $1,152,676,159 |
+| Walt Disney Pictures | Matthew Broderick | $1,083,123,989 |
+| Lucasfilm | Mark Hamill | $962,981,244 |
+| Lucasfilm | Ewan McGregor | $912,082,707 |
+| Universal Pictures | Michael J. Fox | $882,585,318 |
+| Warner Bros. | Daniel Radcliffe | $881,968,171 |
+
+
+### 7.2 🌟 Top 10 Most Profitable Actor-Company Collaborations
+
+This table highlights the most financially successful partnerships between production companies and lead actors, ranked by total profit generated.
+
+| Production Company | Star | Total Profit (USD) |
+| :--- | :--- | :--- |
+| Twentieth Century Fox | Leonardo DiCaprio | $2,001,647,264 |
+| Paramount Pictures | Tom Cruise | $1,276,761,018 |
+| Universal Pictures | Sam Neill | $1,246,709,112 |
+| Paramount Pictures | Harrison Ford | $1,177,913,541 |
+| Paramount Pictures | Eddie Murphy | $1,152,676,159 |
+| Walt Disney Pictures | Matthew Broderick | $1,083,123,989 |
+| Lucasfilm | Mark Hamill | $962,981,244 |
+| Lucasfilm | Ewan McGregor | $912,082,707 |
+| Universal Pictures | Michael J. Fox | $882,585,318 |
+| Warner Bros. | Daniel Radcliffe | $881,968,171 |
+
+### 7.3 🌎 Top 10 Countries by Total Movie Profit
+
+This table shows the cumulative box office profit (Gross - Budget) generated by movies, aggregated by their primary country of production.
+
+| Country | Total Profit (USD) |
+| :--- | :--- |
+| United States | $7,771,014,765 |
+| United Kingdom| $3,375,794,849 |
+| Australia | $933,226,691 |
+| Japan | $878,975,550 |
+| New Zealand | $823,613,493 |
+| Germany | $701,578,804 |
+| Hong Kong | $323,710,749 |
+| France | $301,733,573 |
+| Spain | $203,324,542 |
+| Taiwan | $202,459,195 |
 
 ---
-## 8. Challenges & Solutions
-| Challenge | Impact | Mitigation |
-|-----------|--------|------------|
-| Incomplete Rows | Skewed aggregates | Strict null-drop on critical columns |
-| Zero Budgets/Gross | Distorted profit metrics | Filtered anomalous zeros |
-| Date Parsing Variants | Temporal trend accuracy | Uniform dd-MMM-yy parsing & year extraction |
-| Memory During Local Runs | Shuffle overhead | Column pruning & lazy evaluation awareness |
-| Lack of Explicit User Ratings | Limiting recommender sophistication | Content-based proxy + future ALS plan |
-
----
-## 9. Key Insights
+## 8. Key Insights
 1. Profit highly concentrated: a minority of studios account for disproportionate cumulative earnings.  
 2. High average director score correlates with moderate but consistent runtime bands (no strong incentive for extreme length).  
 3. Star profitability networks suggest repeatable casting strategies.  
 4. Genre high-scorers cluster in quality-driven niches (e.g., Drama/Thriller) while high-vote films align with mainstream genres (Action/Adventure).  
 5. Certification mix influences both volume and average score (stricter certifications show niche but sometimes higher score variance).  
 
----
-## 10. Future Enhancements
-- Implement ALS implicit-factor model using votes as confidence-weighted signals.  
-- Add plot-level or synopsis NLP embeddings (Sentence-BERT) for semantic similarity.  
-- Integrate MySQL persistence layer for curated dimensional model (fact_movie, dim_company, dim_person).  
-- Introduce MLOps pipeline (Delta Lake + scheduled batch retraining).  
-- Deploy via containerization (Docker + Spark cluster) & CI (GitHub Actions).  
-- Add fairness & bias audits (e.g., geographic representation).  
-
----
-## 11. Tech Stack
-| Layer | Tools |
-|-------|-------|
-| Data Processing | Apache Spark (Scala & PySpark) |
-| Language | Scala, Python |
-| Interface | Streamlit |
-| Storage (current) | Local CSV (extensible to MySQL) |
-| Visualization | Streamlit Tables (extensible to Tableau) |
-| Orchestration (future) | Airflow / Prefect (planned) |
-
----
-## 12. Getting Started
-### Prerequisites
-- Python 3.9+
-- Java 8/11 & Spark installed
-- pip install streamlit pyspark
-
-### Run Analytics (Scala REPL / spark-shell)
-```bash
-spark-shell -i main/scala/spark_processing.sc
-```
-
-### Launch Recommendation App
-```bash
-streamlit run movie_recommadation.py
-```
-
-### Environment Variables (Optional)
-- SPARK_DRIVER_MEMORY=4g  
-- JAVA_HOME configured appropriately.
-
----
-## 13. Repository Structure
-```
-├── main/scala/
-│   ├── Main.scala              # Entry placeholder
-│   ├── spark_processing.sc     # Spark preprocessing & analytics
-│   └── movies.csv              # Source dataset (local)
-├── movie_recommadation.py      # Streamlit recommender app
-├── README.md                   # Project documentation
-└── FINAL REPORT.pdf / PPT_SLIDES.pptx
-```
-
----
-## 14. References
-- Apache Spark Documentation  
-- Recommender Systems Handbook (Ricci et al.)  
-- Implicit Feedback Matrix Factorization (Hu et al., 2008)  
-- Kaggle IMDB-like movie metadata sources  
-
----
-## Citation
-If you use this project as a baseline, please cite:  
-Movie Dataset Analysis & Recommendation System (2025). Apache Spark Analytical Pipeline + Content-Based Recommender.
-
----
-## License
-Educational / research use. Extend with proper attribution.
