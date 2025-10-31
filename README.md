@@ -2,6 +2,11 @@
 
 **A Spark-based analytical pipeline and interactive recommendation app leveraging a 4K-movie IMDB-derived dataset (1980–2000) for exploratory insights and lightweight content-based recommendations.**
 
+<p align="center">
+  <img src="image (26).png" alt="Patrol Robot" width="1000"/>
+</p>
+
+
 ---
 ## 🎯 Project Goals
 The primary objective is to build a live movie dashboard and recommendation system. This is broken down into the following key goals:
@@ -61,6 +66,11 @@ Key Analytical Segments:
 
 ---
 ## 6. Recommendation Engine
+
+<p align="center">
+  <img src="image (27).png" alt="Patrol Robot" width="1000"/>
+</p>
+
 Type: Deterministic content-based filtering (genre/star/production house).  
 Logic:  
 - Movie-based: infer genre of selected title → rank peers in same genre by score (top 5).  
